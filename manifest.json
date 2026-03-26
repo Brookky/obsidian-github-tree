@@ -1,0 +1,10 @@
+{
+    "id": "obsidian-github-tree",
+    "name": "GitHub Tree View",
+    "version": "1.0.0",
+    "minAppVersion": "1.0.0",
+    "description": "Browse GitHub repository file trees directly in Obsidian with smooth animations and one-click navigation.",
+    "author": "Brookky",
+    "authorUrl": "https://github.com/Brookky",
+    "isDesktopOnly": false
+}
