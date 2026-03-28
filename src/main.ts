@@ -1,49 +1,49 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
-import { GitHubTreeView, VIEW_TYPE_GITHUB_TREE } from "./tree-view";
-import { GitHubTreeSettingTab, DEFAULT_SETTINGS } from "./settings";
-import type { GitHubTreeSettings } from "./types";
+import { GitGraphView, VIEW_TYPE_GIT_GRAPH } from "./graph-view";
+import { GitGraphSettingTab, DEFAULT_SETTINGS } from "./settings";
+import type { GitGraphSettings } from "./types";
 
 export default class GitHubTreePlugin extends Plugin {
-    settings!: GitHubTreeSettings;
+    settings!: GitGraphSettings;
 
     async onload() {
         await this.loadSettings();
 
         this.registerView(
-            VIEW_TYPE_GITHUB_TREE,
-            (leaf) => new GitHubTreeView(leaf, this)
+            VIEW_TYPE_GIT_GRAPH,
+            (leaf) => new GitGraphView(leaf, this)
         );
 
-        this.addRibbonIcon("github", "GitHub Tree View", () => this.activateView());
+        this.addRibbonIcon("git-branch", "Git Graph", () => this.activateView());
 
         this.addCommand({
-            id: "open-github-tree-view",
-            name: "Open GitHub Tree View",
+            id: "open-git-graph",
+            name: "Open Git Graph",
             callback: () => this.activateView(),
         });
 
-        this.addSettingTab(new GitHubTreeSettingTab(this.app, this));
+        this.addSettingTab(new GitGraphSettingTab(this.app, this));
 
         this.app.workspace.onLayoutReady(() => {
-            if (this.settings.repositories.some((r) => r.owner && r.name)) {
+            if (this.settings.repositories.some((r) => r.path)) {
                 this.activateView();
             }
         });
     }
 
     onunload() {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE_GITHUB_TREE);
+        this.app.workspace.detachLeavesOfType(VIEW_TYPE_GIT_GRAPH);
     }
 
     async activateView() {
         const { workspace } = this.app;
-        const leaves = workspace.getLeavesOfType(VIEW_TYPE_GITHUB_TREE);
+        const leaves = workspace.getLeavesOfType(VIEW_TYPE_GIT_GRAPH);
 
         let leaf: WorkspaceLeaf | null =
             leaves.length > 0 ? leaves[0] : workspace.getLeftLeaf(false);
 
         if (leaf && leaves.length === 0) {
-            await leaf.setViewState({ type: VIEW_TYPE_GITHUB_TREE, active: true });
+            await leaf.setViewState({ type: VIEW_TYPE_GIT_GRAPH, active: true });
         }
 
         if (leaf) workspace.revealLeaf(leaf);
@@ -55,9 +55,8 @@ export default class GitHubTreePlugin extends Plugin {
 
     async saveSettings() {
         await this.saveData(this.settings);
-        // Propagate changes to all open views
-        for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_GITHUB_TREE)) {
-            if (leaf.view instanceof GitHubTreeView) {
+        for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_GIT_GRAPH)) {
+            if (leaf.view instanceof GitGraphView) {
                 await leaf.view.refresh();
             }
         }

@@ -1,52 +1,45 @@
-export interface GitHubTreeItem {
-    path: string;
-    mode: string;
-    type: "blob" | "tree";
-    sha: string;
-    size?: number;
-    url: string;
-}
-
-export interface GitHubAPITreeResponse {
-    sha: string;
-    url: string;
-    tree: GitHubTreeItem[];
-    truncated: boolean;
-}
-
-export interface TreeNode {
+export interface RefLabel {
     name: string;
-    path: string;
-    type: "file" | "folder";
-    children: TreeNode[];
-    sha: string;
-    size?: number;
+    type: "head" | "branch" | "remote" | "tag";
 }
 
-export interface Repository {
+export interface GitCommit {
+    hash: string;
+    shortHash: string;
+    subject: string;
+    author: string;
+    relativeDate: string;
+    parents: string[];
+    refs: RefLabel[];
+}
+
+export interface Edge {
+    fromLane: number;
+    toLane: number;
+    color: string;
+}
+
+export interface CommitRow {
+    commit: GitCommit;
+    lane: number;
+    color: string;
+    /** edges drawn in the upper half of this row (arriving from previous row) */
+    topEdges: Edge[];
+    /** edges drawn in the lower half of this row (leaving to next row) */
+    bottomEdges: Edge[];
+    /** total active lanes in this row (for SVG width) */
+    laneCount: number;
+}
+
+export interface RepoConfig {
     id: string;
-    sourceType: "github" | "local";
-    // GitHub specific
-    owner: string;
-    name: string;
-    branch: string;
-    // Local specific
-    localPath: string;
-    // Common
+    path: string;
     displayName: string;
 }
 
-export interface GitHubTreeSettings {
-    token: string;
-    repositories: Repository[];
+export interface GitGraphSettings {
+    repositories: RepoConfig[];
     activeRepoId: string;
-    cacheTimeout: number;
-    defaultExpanded: boolean;
-    showFileSize: boolean;
-}
-
-export interface CacheEntry {
-    data: TreeNode[];
-    timestamp: number;
-    branches: string[];
+    maxCommits: number;
+    showAllBranches: boolean;
 }

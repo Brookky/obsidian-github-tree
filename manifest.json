@@ -1,10 +1,10 @@
 {
     "id": "obsidian-github-tree",
-    "name": "GitHub Tree View",
-    "version": "1.0.0",
+    "name": "Git Graph",
+    "version": "2.0.0",
     "minAppVersion": "1.0.0",
-    "description": "Browse GitHub repository file trees directly in Obsidian with smooth animations and one-click navigation.",
+    "description": "Visualize Git commit history as an interactive graph inside Obsidian.",
     "author": "Brookky",
     "authorUrl": "https://github.com/Brookky",
-    "isDesktopOnly": false
+    "isDesktopOnly": true
 }

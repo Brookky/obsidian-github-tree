@@ -1,10 +1,9 @@
-/* ═══════════════════════════════════════════════
-   GitHub Tree View — Obsidian Plugin Styles
-   Uses Obsidian CSS variables for theme compat.
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   Git Graph — Obsidian Plugin Styles
+   ═══════════════════════════════════════════════════ */
 
-/* ── Container ─────────────────────────────────── */
-.github-tree-container {
+/* ── Container ──────────────────────────────────── */
+.git-graph-container {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -13,8 +12,8 @@
     color: var(--text-normal);
 }
 
-/* ── Header ────────────────────────────────────── */
-.github-tree-header {
+/* ── Header ─────────────────────────────────────── */
+.git-graph-header {
     flex-shrink: 0;
     padding: 6px 8px 4px;
     border-bottom: 1px solid var(--background-modifier-border);
@@ -23,17 +22,17 @@
     gap: 4px;
 }
 
-.github-tree-row {
+.git-graph-header-row {
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-.github-tree-actions {
+.git-graph-opts {
     justify-content: space-between;
 }
 
-.github-tree-select {
+.git-graph-select {
     flex: 1;
     min-width: 0;
     background: var(--background-secondary);
@@ -42,54 +41,33 @@
     border-radius: var(--radius-s);
     padding: 2px 6px;
     font-size: var(--font-ui-smaller);
-    cursor: pointer;
     height: 24px;
+    cursor: pointer;
+    font-weight: 500;
 }
 
-.github-tree-select:focus {
+.git-graph-select:focus {
     outline: none;
     border-color: var(--interactive-accent);
 }
 
-.github-tree-repo-select {
-    font-weight: 500;
-}
-
-.github-tree-branch-wrap {
+.git-graph-toggle-label {
     display: flex;
     align-items: center;
-    gap: 3px;
-    min-width: 0;
-    flex: 1;
-}
-
-.github-tree-branch-select {
-    font-family: var(--font-monospace);
-    font-size: 11px;
-}
-
-.github-tree-branch-label {
-    font-family: var(--font-monospace);
-    font-size: 11px;
+    gap: 4px;
+    font-size: var(--font-ui-smaller);
     color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
 }
 
-.github-tree-icon-sm {
-    display: flex;
-    align-items: center;
-    color: var(--text-muted);
-    flex-shrink: 0;
+.git-graph-meta {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-faint);
+    margin-left: auto;
 }
 
-.github-tree-icon-sm svg {
-    width: 12px;
-    height: 12px;
-}
-
-.github-tree-icon-btn {
+.git-graph-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,28 +79,28 @@
     padding: 3px;
     width: 22px;
     height: 22px;
-    transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
 }
 
-.github-tree-icon-btn:hover {
+.git-graph-icon-btn:hover {
     color: var(--text-normal);
     background: var(--background-modifier-hover);
 }
 
-.github-tree-icon-btn svg {
+.git-graph-icon-btn svg {
     width: 13px;
     height: 13px;
 }
 
-/* ── Search ────────────────────────────────────── */
-.github-tree-search-wrap {
+/* ── Search ─────────────────────────────────────── */
+.git-graph-search-wrap {
     flex-shrink: 0;
     padding: 4px 8px;
     border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.github-tree-search-inner {
+.git-graph-search-inner {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -134,23 +112,20 @@
     transition: border-color 0.15s;
 }
 
-.github-tree-search-inner:focus-within {
+.git-graph-search-inner:focus-within {
     border-color: var(--interactive-accent);
 }
 
-.github-tree-search-icon {
+.git-graph-search-icon {
     display: flex;
     align-items: center;
     color: var(--text-muted);
     flex-shrink: 0;
 }
 
-.github-tree-search-icon svg {
-    width: 12px;
-    height: 12px;
-}
+.git-graph-search-icon svg { width: 12px; height: 12px; }
 
-.github-tree-search-input {
+.git-graph-search-input {
     flex: 1;
     background: none;
     border: none;
@@ -161,11 +136,9 @@
     min-width: 0;
 }
 
-.github-tree-search-input::placeholder {
-    color: var(--text-faint);
-}
+.git-graph-search-input::placeholder { color: var(--text-faint); }
 
-.github-tree-search-clear {
+.git-graph-search-clear {
     display: flex;
     align-items: center;
     background: none;
@@ -173,148 +146,151 @@
     color: var(--text-muted);
     cursor: pointer;
     padding: 0;
-    border-radius: var(--radius-s);
     transition: color 0.15s;
-    flex-shrink: 0;
 }
 
-.github-tree-search-clear:hover {
-    color: var(--text-normal);
-}
+.git-graph-search-clear:hover { color: var(--text-normal); }
+.git-graph-search-clear svg { width: 11px; height: 11px; }
 
-.github-tree-search-clear svg {
-    width: 11px;
-    height: 11px;
-}
-
-/* ── Tree content ──────────────────────────────── */
-.github-tree-content {
+/* ── Content (scrollable) ───────────────────────── */
+.git-graph-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     scroll-behavior: smooth;
-    padding: 4px 0;
 }
 
-/* Custom scrollbar */
-.github-tree-content::-webkit-scrollbar {
-    width: 4px;
-}
-
-.github-tree-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.github-tree-content::-webkit-scrollbar-thumb {
+.git-graph-content::-webkit-scrollbar { width: 4px; }
+.git-graph-content::-webkit-scrollbar-track { background: transparent; }
+.git-graph-content::-webkit-scrollbar-thumb {
     background: var(--background-modifier-border);
     border-radius: 2px;
 }
+.git-graph-content::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
-.github-tree-content::-webkit-scrollbar-thumb:hover {
-    background: var(--text-faint);
-}
-
-/* ── Tree nodes ────────────────────────────────── */
-.github-tree-node {
-    user-select: none;
-}
-
-.github-tree-node-row {
+/* ── Commit rows ────────────────────────────────── */
+.git-graph-row {
     display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 2px 8px 2px calc(8px + var(--depth, 0) * 16px);
+    align-items: stretch;
+    min-height: 28px;
     cursor: pointer;
-    border-radius: 0;
+    border-bottom: 1px solid transparent;
     transition: background 0.1s;
-    min-height: 24px;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
-.github-tree-node-row:hover {
+.git-graph-row:hover {
     background: var(--background-modifier-hover);
 }
 
-.github-tree-node-row:active {
+.git-graph-row:active {
     background: var(--background-modifier-active-hover);
 }
 
-/* ── Chevron ───────────────────────────────────── */
-.github-tree-chevron {
+/* SVG graph column */
+.git-graph-cell-svg {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    transition: transform 0.15s ease;
 }
 
-.github-tree-chevron svg {
-    width: 12px;
-    height: 12px;
+.git-graph-svg {
+    display: block;
+    overflow: visible;
 }
 
-.github-tree-chevron--file {
-    visibility: hidden;
-}
-
-/* ── Node icon ─────────────────────────────────── */
-.github-tree-node-icon {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    color: var(--text-muted);
-}
-
-.github-tree-node-icon svg {
-    width: 14px;
-    height: 14px;
-}
-
-.github-tree-folder > .github-tree-node-row .github-tree-node-icon {
-    color: var(--color-yellow, #e8b44e);
-}
-
-/* ── Node name ─────────────────────────────────── */
-.github-tree-node-name {
+/* Info column */
+.git-graph-cell-info {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3px 8px 3px 4px;
+    gap: 2px;
+}
+
+/* ── Ref badges ─────────────────────────────────── */
+.git-graph-refs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.git-graph-ref {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-family: var(--font-monospace);
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--font-ui-small);
     line-height: 1.4;
 }
 
-.github-tree-folder > .github-tree-node-row .github-tree-node-name {
-    font-weight: 500;
+.git-graph-ref--head {
+    background: var(--color-accent-1, #4c9be8);
+    color: white;
+    font-weight: 600;
 }
 
-/* ── File size ─────────────────────────────────── */
-.github-tree-file-size {
+.git-graph-ref--branch {
+    background: var(--color-green, #3fb950);
+    color: white;
+}
+
+.git-graph-ref--remote {
+    background: var(--background-modifier-border);
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+}
+
+.git-graph-ref--tag {
+    background: var(--color-yellow, #e3b341);
+    color: #1c1c1c;
+}
+
+/* ── Commit text ────────────────────────────────── */
+.git-graph-subject {
+    font-size: var(--font-ui-small);
+    color: var(--text-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.git-graph-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.git-graph-author {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
+
+.git-graph-sep { color: var(--text-faint); flex-shrink: 0; }
+
+.git-graph-date { flex-shrink: 0; }
+
+.git-graph-hash {
+    font-family: var(--font-monospace);
     font-size: 10px;
     color: var(--text-faint);
     flex-shrink: 0;
-    font-family: var(--font-monospace);
 }
 
-/* ── Children (animated collapse/expand) ──────── */
-.github-tree-children {
-    overflow: hidden;
-    height: 0;
-    transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.github-tree-children.is-open {
-    /* height is set to auto via JS after transition */
-}
-
-/* ── States ────────────────────────────────────── */
-.github-tree-empty {
+/* ── States ─────────────────────────────────────── */
+.git-graph-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -325,21 +301,11 @@
     color: var(--text-muted);
 }
 
-.github-tree-empty-icon {
-    opacity: 0.3;
-}
+.git-graph-empty-icon { opacity: 0.3; }
+.git-graph-empty-icon svg { width: 40px; height: 40px; }
+.git-graph-empty p { font-size: var(--font-ui-small); margin: 0; }
 
-.github-tree-empty-icon svg {
-    width: 40px;
-    height: 40px;
-}
-
-.github-tree-empty p {
-    font-size: var(--font-ui-small);
-    margin: 0;
-}
-
-.github-tree-loading {
+.git-graph-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -349,36 +315,33 @@
     font-size: var(--font-ui-small);
 }
 
-/* Spinner animation */
-.github-tree-spinner {
+.git-graph-spinner {
     width: 24px;
     height: 24px;
     border: 2px solid var(--background-modifier-border);
     border-top-color: var(--interactive-accent);
     border-radius: 50%;
-    animation: github-tree-spin 0.8s linear infinite;
+    animation: git-graph-spin 0.8s linear infinite;
 }
 
-@keyframes github-tree-spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes git-graph-spin { to { transform: rotate(360deg); } }
 
-.github-tree-hint {
+.git-graph-hint {
     padding: 16px 12px;
     color: var(--text-muted);
     font-size: var(--font-ui-smaller);
     text-align: center;
 }
 
-/* ── Settings page extras ──────────────────────── */
-.github-tree-repo-section {
+/* ── Settings ───────────────────────────────────── */
+.git-graph-repo-section {
     border: 1px solid var(--background-modifier-border);
     border-radius: var(--radius-m);
     padding: 8px 12px 4px;
     margin-bottom: 12px;
 }
 
-.github-tree-repo-heading {
+.git-graph-repo-heading {
     margin: 0 0 8px;
     font-size: var(--font-ui-small);
     color: var(--text-muted);
