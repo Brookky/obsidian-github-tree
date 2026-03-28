@@ -2,3 +2,22 @@ node_modules/
 main.js
 *.js.map
 .DS_Store
+
+# Obsidian vault settings
+.obsidian/
+
+# oh-my-claudecode state & config
+.omc/
+
+# Claude Code config
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# Pencil design files
+*.pen
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
