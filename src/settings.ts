@@ -17,6 +17,18 @@ function generateId(): string {
     return Math.random().toString(36).slice(2, 9);
 }
 
+function makeRepo(sourceType: "github" | "local"): Repository {
+    return {
+        id: generateId(),
+        sourceType,
+        owner: "",
+        name: "",
+        branch: "main",
+        localPath: "",
+        displayName: "",
+    };
+}
+
 export class GitHubTreeSettingTab extends PluginSettingTab {
     plugin: GitHubTreePlugin;
 
@@ -31,13 +43,13 @@ export class GitHubTreeSettingTab extends PluginSettingTab {
 
         containerEl.createEl("h2", { text: "GitHub Tree View" });
 
-        // ── Authentication ──────────────────────────────────────
-        containerEl.createEl("h3", { text: "Authentication" });
+        // ── GitHub Authentication ───────────────────────────────
+        containerEl.createEl("h3", { text: "GitHub Authentication" });
 
         new Setting(containerEl)
-            .setName("GitHub Personal Access Token")
+            .setName("Personal Access Token")
             .setDesc(
-                "Required for private repos or to increase rate limits (5000 req/hr vs 60). Needs 'repo' or 'public_repo' scope."
+                "Required for private GitHub repos or to increase rate limits (5,000 req/hr vs 60). Needs 'repo' or 'public_repo' scope. Not needed for local folders."
             )
             .addText((text) => {
                 text.inputEl.type = "password";
@@ -54,7 +66,7 @@ export class GitHubTreeSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName("Cache Duration (minutes)")
-            .setDesc("How long to cache repository tree data. 0 = always fetch fresh.")
+            .setDesc("How long to cache GitHub tree data. 0 = always fetch fresh. (Not used for local folders.)")
             .addSlider((slider) =>
                 slider
                     .setLimits(0, 60, 1)
@@ -93,21 +105,30 @@ export class GitHubTreeSettingTab extends PluginSettingTab {
         // ── Repositories ─────────────────────────────────────────
         containerEl.createEl("h3", { text: "Repositories" });
 
-        new Setting(containerEl)
-            .setName("Add Repository")
-            .setDesc("Add a GitHub repository to browse in the sidebar.")
+        const addRow = containerEl.createDiv({ cls: "github-tree-add-row" });
+
+        new Setting(addRow)
+            .setName("Add Source")
+            .setDesc("Add a GitHub repository (needs API) or a local folder (no auth required).")
             .addButton((btn) =>
                 btn
-                    .setButtonText("+ Add Repository")
+                    .setButtonText("+ GitHub Repo")
                     .setCta()
                     .onClick(async () => {
-                        const repo: Repository = {
-                            id: generateId(),
-                            owner: "",
-                            name: "",
-                            branch: "main",
-                            displayName: "",
-                        };
+                        const repo = makeRepo("github");
+                        this.plugin.settings.repositories.push(repo);
+                        if (!this.plugin.settings.activeRepoId) {
+                            this.plugin.settings.activeRepoId = repo.id;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    })
+            )
+            .addButton((btn) =>
+                btn
+                    .setButtonText("+ Local Folder")
+                    .onClick(async () => {
+                        const repo = makeRepo("local");
                         this.plugin.settings.repositories.push(repo);
                         if (!this.plugin.settings.activeRepoId) {
                             this.plugin.settings.activeRepoId = repo.id;
@@ -118,56 +139,86 @@ export class GitHubTreeSettingTab extends PluginSettingTab {
             );
 
         for (const [index, repo] of this.plugin.settings.repositories.entries()) {
+            // Migrate old entries without sourceType
+            if (!repo.sourceType) (repo as Repository).sourceType = "github";
+            if (!repo.localPath) (repo as Repository).localPath = "";
+
             const repoSection = containerEl.createDiv({ cls: "github-tree-repo-section" });
 
+            const label =
+                repo.displayName ||
+                (repo.sourceType === "local"
+                    ? repo.localPath || `Local Folder ${index + 1}`
+                    : repo.owner && repo.name
+                    ? `${repo.owner}/${repo.name}`
+                    : `Repository ${index + 1}`);
+
+            const badge = repo.sourceType === "local" ? " 📁" : " 🐙";
             repoSection.createEl("h4", {
-                text: repo.displayName || (repo.owner && repo.name ? `${repo.owner}/${repo.name}` : `Repository ${index + 1}`),
+                text: label + badge,
                 cls: "github-tree-repo-heading",
             });
 
-            new Setting(repoSection)
-                .setName("Owner")
-                .setDesc("GitHub username or organization")
-                .addText((text) =>
-                    text
-                        .setPlaceholder("e.g. torvalds")
-                        .setValue(repo.owner)
-                        .onChange(async (value) => {
-                            repo.owner = value.trim();
-                            await this.plugin.saveSettings();
-                        })
-                );
+            if (repo.sourceType === "local") {
+                // ── Local folder settings ──
+                new Setting(repoSection)
+                    .setName("Folder Path")
+                    .setDesc("Absolute path to the local folder (e.g. /Users/you/Documents/my-repo)")
+                    .addText((text) =>
+                        text
+                            .setPlaceholder("/Users/you/Documents/my-repo")
+                            .setValue(repo.localPath)
+                            .onChange(async (value) => {
+                                repo.localPath = value.trim();
+                                await this.plugin.saveSettings();
+                            })
+                    );
+            } else {
+                // ── GitHub settings ──
+                new Setting(repoSection)
+                    .setName("Owner")
+                    .setDesc("GitHub username or organization")
+                    .addText((text) =>
+                        text
+                            .setPlaceholder("e.g. torvalds")
+                            .setValue(repo.owner)
+                            .onChange(async (value) => {
+                                repo.owner = value.trim();
+                                await this.plugin.saveSettings();
+                            })
+                    );
 
-            new Setting(repoSection)
-                .setName("Repository Name")
-                .addText((text) =>
-                    text
-                        .setPlaceholder("e.g. linux")
-                        .setValue(repo.name)
-                        .onChange(async (value) => {
-                            repo.name = value.trim();
-                            await this.plugin.saveSettings();
-                        })
-                );
+                new Setting(repoSection)
+                    .setName("Repository Name")
+                    .addText((text) =>
+                        text
+                            .setPlaceholder("e.g. linux")
+                            .setValue(repo.name)
+                            .onChange(async (value) => {
+                                repo.name = value.trim();
+                                await this.plugin.saveSettings();
+                            })
+                    );
 
-            new Setting(repoSection)
-                .setName("Default Branch")
-                .addText((text) =>
-                    text
-                        .setPlaceholder("main")
-                        .setValue(repo.branch)
-                        .onChange(async (value) => {
-                            repo.branch = value.trim() || "main";
-                            await this.plugin.saveSettings();
-                        })
-                );
+                new Setting(repoSection)
+                    .setName("Default Branch")
+                    .addText((text) =>
+                        text
+                            .setPlaceholder("main")
+                            .setValue(repo.branch)
+                            .onChange(async (value) => {
+                                repo.branch = value.trim() || "main";
+                                await this.plugin.saveSettings();
+                            })
+                    );
+            }
 
             new Setting(repoSection)
                 .setName("Display Name")
                 .setDesc("Friendly label shown in the sidebar dropdown")
                 .addText((text) =>
                     text
-                        .setPlaceholder("Leave empty to use owner/name")
+                        .setPlaceholder("Leave empty for auto")
                         .setValue(repo.displayName)
                         .onChange(async (value) => {
                             repo.displayName = value.trim();

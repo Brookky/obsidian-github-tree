@@ -25,9 +25,14 @@ export interface TreeNode {
 
 export interface Repository {
     id: string;
+    sourceType: "github" | "local";
+    // GitHub specific
     owner: string;
     name: string;
     branch: string;
+    // Local specific
+    localPath: string;
+    // Common
     displayName: string;
 }
 
