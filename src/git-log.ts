@@ -19,7 +19,7 @@ export function getCommits(
     maxCount: number,
     allBranches: boolean
 ): GitCommit[] {
-    const SEP = "\x00";
+    const SEP = "\x1f";
     const args = [
         "log",
         `--format=%H${SEP}%h${SEP}%s${SEP}%an${SEP}%ar${SEP}%P${SEP}%D`,
