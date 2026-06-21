@@ -1,3 +1,9 @@
+---
+type: doc
+title: "GitHub Tree View — Obsidian Plugin"
+created: 2026-03-26
+updated: 2026-03-26
+---
 # GitHub Tree View — Obsidian Plugin
 
 Browse GitHub repository file trees directly in your Obsidian sidebar with smooth animations, branch switching, and one-click navigation.
