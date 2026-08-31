@@ -31,6 +31,24 @@ export interface CommitRow {
     laneCount: number;
 }
 
+export interface FileChange {
+    added: number | null;   // null = binary
+    deleted: number | null;
+    path: string;
+}
+
+export interface CommitDetail {
+    hash: string;
+    shortHash: string;
+    subject: string;
+    body: string;
+    author: string;
+    date: string;
+    relativeDate: string;
+    files: FileChange[];
+    rawDiff: string;
+}
+
 export interface RepoConfig {
     id: string;
     path: string;

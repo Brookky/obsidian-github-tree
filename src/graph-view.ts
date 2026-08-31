@@ -1,8 +1,8 @@
 import { ItemView, WorkspaceLeaf, setIcon, Notice, Menu } from "obsidian";
 import type GitHubTreePlugin from "./main";
-import { getCommits } from "./git-log";
+import { getCommits, getCommitDetail } from "./git-log";
 import { layoutGraph } from "./graph-layout";
-import type { CommitRow, Edge, RefLabel } from "./types";
+import type { CommitRow, Edge, RefLabel, CommitDetail } from "./types";
 
 export const VIEW_TYPE_GIT_GRAPH = "git-graph-view";
 
@@ -70,6 +70,41 @@ function renderRowSVG(row: CommitRow): SVGSVGElement {
     return svg;
 }
 
+interface DiffLine {
+    type: "hunk" | "add" | "remove" | "context";
+    content: string;
+}
+
+interface DiffFile {
+    path: string;
+    lines: DiffLine[];
+}
+
+function parseDiff(rawDiff: string): DiffFile[] {
+    const files: DiffFile[] = [];
+    let current: DiffFile | null = null;
+
+    for (const line of rawDiff.split("\n")) {
+        if (line.startsWith("diff --git ")) {
+            if (current) files.push(current);
+            const bIdx = line.lastIndexOf(" b/");
+            current = { path: bIdx !== -1 ? line.slice(bIdx + 3) : "", lines: [] };
+        } else if (!current) {
+            continue;
+        } else if (line.startsWith("@@")) {
+            current.lines.push({ type: "hunk", content: line });
+        } else if (line.startsWith("+") && !line.startsWith("+++")) {
+            current.lines.push({ type: "add", content: line.slice(1) });
+        } else if (line.startsWith("-") && !line.startsWith("---")) {
+            current.lines.push({ type: "remove", content: line.slice(1) });
+        } else if (line.startsWith(" ")) {
+            current.lines.push({ type: "context", content: line.slice(1) });
+        }
+    }
+    if (current) files.push(current);
+    return files;
+}
+
 function refBadge(ref: RefLabel): HTMLElement {
     const badge = document.createElement("span");
     badge.className = `git-graph-ref git-graph-ref--${ref.type}`;
@@ -82,6 +117,10 @@ export class GitGraphView extends ItemView {
     private isLoading = false;
     private searchQuery = "";
     private searchTimer: ReturnType<typeof setTimeout> | null = null;
+    private selectedHash: string | null = null;
+    private detail: CommitDetail | null = null;
+    private isDetailLoading = false;
+    private detailRequestId = 0;
 
     constructor(leaf: WorkspaceLeaf, private plugin: GitHubTreePlugin) {
         super(leaf);
@@ -116,7 +155,9 @@ export class GitGraphView extends ItemView {
         this.renderHeader(root.createDiv({ cls: "git-graph-header" }));
         this.renderSearch(root.createDiv({ cls: "git-graph-search-wrap" }));
 
-        const content = root.createDiv({ cls: "git-graph-content" });
+        const hasDetail = this.isDetailLoading || this.detail !== null;
+        const body = root.createDiv({ cls: hasDetail ? "git-graph-body git-graph-body--split" : "git-graph-body" });
+        const content = body.createDiv({ cls: "git-graph-content" });
 
         if (this.plugin.settings.repositories.length === 0) {
             this.renderEmpty(content);
@@ -127,6 +168,39 @@ export class GitGraphView extends ItemView {
         } else {
             content.createDiv({ cls: "git-graph-hint", text: "No commits found." });
         }
+
+        if (hasDetail) {
+            const resizer = body.createDiv({ cls: "git-graph-resizer" });
+            this.attachResizer(resizer, content);
+
+            const detailPanel = body.createDiv({ cls: "git-graph-detail-panel" });
+            if (this.isDetailLoading) {
+                const loading = detailPanel.createDiv({ cls: "git-graph-detail-loading" });
+                loading.createDiv({ cls: "git-graph-spinner" });
+                loading.createSpan({ text: "Loading diff…" });
+            } else if (this.detail) {
+                this.renderDetail(detailPanel, this.detail);
+            }
+        }
+    }
+
+    private attachResizer(resizer: HTMLElement, contentEl: HTMLElement) {
+        resizer.addEventListener("mousedown", (e: MouseEvent) => {
+            const startY = e.clientY;
+            const startH = contentEl.offsetHeight;
+
+            const onMove = (ev: MouseEvent) => {
+                const newH = Math.max(60, startH + (ev.clientY - startY));
+                contentEl.style.flex = `0 0 ${newH}px`;
+            };
+            const onUp = () => {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+            };
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+            e.preventDefault();
+        });
     }
 
     // ── Header ───────────────────────────────────────────────────
@@ -144,6 +218,10 @@ export class GitGraphView extends ItemView {
             sel.addEventListener("change", async () => {
                 this.plugin.settings.activeRepoId = sel.value;
                 await this.plugin.saveSettings();
+                this.detailRequestId++;
+                this.selectedHash = null;
+                this.detail = null;
+                this.isDetailLoading = false;
                 const repo = this.getActiveRepo();
                 if (repo) await this.loadGraph(repo.path);
             });
@@ -258,7 +336,10 @@ export class GitGraphView extends ItemView {
     }
 
     private renderRow(container: HTMLElement, row: CommitRow) {
-        const rowEl = container.createDiv({ cls: "git-graph-row" });
+        const cls = row.commit.hash === this.selectedHash
+            ? "git-graph-row git-graph-row--selected"
+            : "git-graph-row";
+        const rowEl = container.createDiv({ cls });
         rowEl.setAttribute("title", `${row.commit.hash}\n${row.commit.author} · ${row.commit.relativeDate}`);
 
         // SVG graph cell
@@ -287,10 +368,19 @@ export class GitGraphView extends ItemView {
         meta.createSpan({ cls: "git-graph-sep", text: "·" });
         meta.createSpan({ cls: "git-graph-hash", text: row.commit.shortHash });
 
-        // Click: copy hash
+        // Click: open detail panel
         rowEl.addEventListener("click", () => {
-            navigator.clipboard.writeText(row.commit.hash);
-            new Notice(`Copied: ${row.commit.shortHash}`);
+            const repo = this.getActiveRepo();
+            if (!repo) return;
+            const scrollTop = container.scrollTop;
+            this.selectedHash = row.commit.hash;
+            this.detail = null;
+            this.isDetailLoading = true;
+            const requestId = ++this.detailRequestId;
+            this.render();
+            const newContent = this.containerEl.querySelector(".git-graph-content") as HTMLElement | null;
+            if (newContent) newContent.scrollTop = scrollTop;
+            void this.loadDetail(repo.path, row.commit.hash, scrollTop, requestId);
         });
 
         // Context menu
@@ -317,6 +407,90 @@ export class GitGraphView extends ItemView {
             );
             menu.showAtMouseEvent(e);
         });
+    }
+
+    // ── Detail ───────────────────────────────────────────────────
+    private async loadDetail(repoPath: string, hash: string, scrollTop: number, requestId: number) {
+        await new Promise(r => setTimeout(r, 0)); // let loading UI paint first
+        if (requestId !== this.detailRequestId) return;
+        try {
+            this.detail = getCommitDetail(repoPath, hash);
+        } catch (err) {
+            if (requestId !== this.detailRequestId) return;
+            console.error("Git Graph: detail load failed", err);
+            new Notice("Failed to load commit details");
+            this.detail = null;
+        } finally {
+            if (requestId !== this.detailRequestId) return;
+            this.isDetailLoading = false;
+            this.render();
+            const el = this.containerEl.querySelector(".git-graph-content") as HTMLElement | null;
+            if (el) el.scrollTop = scrollTop;
+        }
+    }
+
+    private renderDetail(panel: HTMLElement, detail: CommitDetail) {
+        // Header
+        const header = panel.createDiv({ cls: "git-graph-detail-header" });
+        const titleRow = header.createDiv({ cls: "git-graph-detail-title-row" });
+        titleRow.createEl("code", { cls: "git-graph-detail-hash", text: detail.shortHash });
+        titleRow.createSpan({ cls: "git-graph-detail-author", text: detail.author });
+        if (detail.date) {
+            titleRow.createSpan({ cls: "git-graph-sep", text: "·" });
+            titleRow.createSpan({ cls: "git-graph-detail-date", text: detail.date });
+        }
+        const closeBtn = titleRow.createEl("button", {
+            cls: "git-graph-icon-btn clickable-icon",
+            attr: { "aria-label": "Close detail" },
+        });
+        setIcon(closeBtn, "x");
+        closeBtn.addEventListener("click", () => {
+            this.detail = null;
+            this.selectedHash = null;
+            this.isDetailLoading = false;
+            this.render();
+        });
+
+        header.createDiv({ cls: "git-graph-detail-subject", text: detail.subject });
+        if (detail.body) {
+            header.createDiv({ cls: "git-graph-detail-body", text: detail.body });
+        }
+
+        // File list
+        if (detail.files.length > 0) {
+            const fileSection = panel.createDiv({ cls: "git-graph-detail-files" });
+            fileSection.createDiv({
+                cls: "git-graph-detail-section-title",
+                text: `Changed Files (${detail.files.length})`,
+            });
+            for (const file of detail.files) {
+                const row = fileSection.createDiv({ cls: "git-graph-detail-file-row" });
+                row.createSpan({ cls: "git-graph-detail-file-path", text: file.path });
+                const stats = row.createSpan({ cls: "git-graph-detail-file-stats" });
+                if (file.added !== null && file.added > 0)
+                    stats.createSpan({ cls: "git-graph-stat-add", text: `+${file.added}` });
+                if (file.deleted !== null && file.deleted > 0)
+                    stats.createSpan({ cls: "git-graph-stat-del", text: `-${file.deleted}` });
+                if (file.added === null)
+                    stats.createSpan({ cls: "git-graph-stat-bin", text: "binary" });
+            }
+        }
+
+        // Diff
+        if (detail.rawDiff.trim()) {
+            const diffSection = panel.createDiv({ cls: "git-graph-diff-section" });
+            for (const diffFile of parseDiff(detail.rawDiff)) {
+                const block = diffSection.createDiv({ cls: "git-graph-diff-file" });
+                block.createDiv({ cls: "git-graph-diff-file-header", text: diffFile.path });
+                const linesEl = block.createDiv({ cls: "git-graph-diff-lines" });
+                for (const line of diffFile.lines) {
+                    const el = linesEl.createDiv({ cls: `git-graph-diff-line git-graph-diff-line--${line.type}` });
+                    el.textContent = line.content;
+                }
+            }
+        } else if (detail.files.length > 0) {
+            panel.createDiv({ cls: "git-graph-hint", text: "Merge commit — no line diff available." });
+        }
     }
 
     // ── States ───────────────────────────────────────────────────

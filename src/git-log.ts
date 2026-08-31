@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { execFileSync } = require("child_process") as typeof import("child_process");
 
-import type { GitCommit, RefLabel } from "./types";
+import type { GitCommit, RefLabel, FileChange, CommitDetail } from "./types";
 
 function parseRefs(rawD: string): RefLabel[] {
     if (!rawD.trim()) return [];
@@ -71,6 +71,53 @@ export function getRepoName(repoPath: string): string {
     } catch {
         return repoPath.split("/").pop() ?? repoPath;
     }
+}
+
+export function getCommitDetail(repoPath: string, hash: string): CommitDetail {
+    const SEP = "\x1f";
+
+    const metaRaw = execFileSync("git", [
+        "log", "-1", hash,
+        `--format=%H${SEP}%h${SEP}%s${SEP}%b${SEP}%an${SEP}%ad${SEP}%ar`,
+        "--date=format:%Y-%m-%d %H:%M",
+    ], { cwd: repoPath, encoding: "utf8", timeout: 10000, stdio: ["pipe", "pipe", "pipe"] }).trim();
+
+    const parts = metaRaw.split(SEP);
+
+    let files: FileChange[] = [];
+    try {
+        const numstatRaw = execFileSync("git", [
+            "diff-tree", "--no-commit-id", "-r", "--numstat", hash,
+        ], { cwd: repoPath, encoding: "utf8", timeout: 10000, stdio: ["pipe", "pipe", "pipe"] }).trim();
+
+        files = numstatRaw.split("\n").filter(l => l.trim()).map(line => {
+            const cols = line.split("\t");
+            return {
+                added: cols[0] === "-" ? null : parseInt(cols[0] ?? "0", 10),
+                deleted: cols[1] === "-" ? null : parseInt(cols[1] ?? "0", 10),
+                path: cols.slice(2).join("\t"),
+            };
+        });
+    } catch { /* merge or initial commit */ }
+
+    let rawDiff = "";
+    try {
+        rawDiff = execFileSync("git", [
+            "diff-tree", "--no-commit-id", "-r", "-p", "--no-color", hash,
+        ], { cwd: repoPath, encoding: "utf8", timeout: 30000, stdio: ["pipe", "pipe", "pipe"] });
+    } catch { /* silent */ }
+
+    return {
+        hash: parts[0] ?? hash,
+        shortHash: parts[1] ?? hash.slice(0, 7),
+        subject: parts[2] ?? "",
+        body: parts[3]?.trim() ?? "",
+        author: parts[4] ?? "",
+        date: parts[5] ?? "",
+        relativeDate: parts[6] ?? "",
+        files,
+        rawDiff,
+    };
 }
 
 export function isGitRepo(path: string): boolean {

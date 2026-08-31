@@ -152,12 +152,26 @@
 .git-graph-search-clear:hover { color: var(--text-normal); }
 .git-graph-search-clear svg { width: 11px; height: 11px; }
 
-/* ── Content (scrollable) ───────────────────────── */
+/* ── Body (wraps list + detail) ─────────────────── */
+.git-graph-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Content (scrollable commit list) ──────────── */
 .git-graph-content {
     flex: 1;
+    min-height: 60px;
     overflow-y: auto;
     overflow-x: hidden;
     scroll-behavior: smooth;
+}
+
+.git-graph-body--split .git-graph-content {
+    flex: 0 0 40%;
 }
 
 .git-graph-content::-webkit-scrollbar { width: 4px; }
@@ -167,6 +181,221 @@
     border-radius: 2px;
 }
 .git-graph-content::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+/* ── Resizer ────────────────────────────────────── */
+.git-graph-resizer {
+    flex-shrink: 0;
+    height: 5px;
+    background: var(--background-modifier-border);
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.git-graph-resizer::after {
+    content: "";
+    width: 28px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text-faint);
+}
+
+.git-graph-resizer:hover {
+    background: var(--interactive-accent);
+}
+
+/* ── Detail panel ───────────────────────────────── */
+.git-graph-detail-panel {
+    flex: 1;
+    min-height: 80px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-top: none;
+}
+
+.git-graph-detail-panel::-webkit-scrollbar { width: 4px; }
+.git-graph-detail-panel::-webkit-scrollbar-track { background: transparent; }
+.git-graph-detail-panel::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 2px;
+}
+
+.git-graph-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 16px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+}
+
+.git-graph-detail-header {
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+}
+
+.git-graph-detail-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.git-graph-detail-hash {
+    font-family: var(--font-monospace);
+    font-size: 11px;
+    background: var(--background-modifier-border);
+    color: var(--text-accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.git-graph-detail-author {
+    font-size: var(--font-ui-smaller);
+    font-weight: 500;
+    color: var(--text-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.git-graph-detail-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.git-graph-detail-subject {
+    font-size: var(--font-ui-small);
+    font-weight: 600;
+    color: var(--text-normal);
+    line-height: 1.4;
+    margin-bottom: 2px;
+}
+
+.git-graph-detail-body {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+/* ── File list ──────────────────────────────────── */
+.git-graph-detail-files {
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.git-graph-detail-section-title {
+    padding: 5px 10px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--background-secondary);
+}
+
+.git-graph-detail-file-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 10px;
+    font-size: 11px;
+    gap: 8px;
+    min-height: 22px;
+    border-bottom: 1px solid transparent;
+}
+
+.git-graph-detail-file-row:hover {
+    background: var(--background-modifier-hover);
+}
+
+.git-graph-detail-file-path {
+    font-family: var(--font-monospace);
+    font-size: 11px;
+    color: var(--text-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.git-graph-detail-file-stats {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    font-family: var(--font-monospace);
+    font-size: 11px;
+}
+
+.git-graph-stat-add { color: var(--color-green, #3fb950); }
+.git-graph-stat-del { color: var(--color-red, #f85149); }
+.git-graph-stat-bin { color: var(--text-faint); }
+
+/* ── Diff view ──────────────────────────────────── */
+.git-graph-diff-section {
+    padding: 0;
+}
+
+.git-graph-diff-file {
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.git-graph-diff-file-header {
+    padding: 4px 10px;
+    font-family: var(--font-monospace);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-normal);
+    background: var(--background-secondary);
+    border-bottom: 1px solid var(--background-modifier-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.git-graph-diff-lines {
+    overflow-x: auto;
+}
+
+.git-graph-diff-line {
+    font-family: var(--font-monospace);
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 0 10px;
+    white-space: pre;
+    display: block;
+}
+
+.git-graph-diff-line--add {
+    background: rgba(63, 185, 80, 0.12);
+    color: #3fb950;
+}
+
+.git-graph-diff-line--remove {
+    background: rgba(248, 81, 73, 0.12);
+    color: #f85149;
+}
+
+.git-graph-diff-line--hunk {
+    background: rgba(76, 155, 232, 0.1);
+    color: var(--text-accent);
+    font-weight: 500;
+}
+
+.git-graph-diff-line--context {
+    color: var(--text-muted);
+}
 
 /* ── Commit rows ────────────────────────────────── */
 .git-graph-row {
@@ -184,6 +413,11 @@
 
 .git-graph-row:active {
     background: var(--background-modifier-active-hover);
+}
+
+.git-graph-row--selected {
+    background: var(--background-modifier-active-hover) !important;
+    border-left: 2px solid var(--interactive-accent);
 }
 
 /* SVG graph column */
