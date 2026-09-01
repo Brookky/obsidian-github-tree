@@ -87,7 +87,7 @@ export function getCommitDetail(repoPath: string, hash: string): CommitDetail {
     let files: FileChange[] = [];
     try {
         const numstatRaw = execFileSync("git", [
-            "diff-tree", "--no-commit-id", "-r", "--numstat", hash,
+            "diff-tree", "--root", "--no-commit-id", "-r", "--numstat", hash,
         ], { cwd: repoPath, encoding: "utf8", timeout: 10000, stdio: ["pipe", "pipe", "pipe"] }).trim();
 
         files = numstatRaw.split("\n").filter(l => l.trim()).map(line => {
@@ -103,7 +103,7 @@ export function getCommitDetail(repoPath: string, hash: string): CommitDetail {
     let rawDiff = "";
     try {
         rawDiff = execFileSync("git", [
-            "diff-tree", "--no-commit-id", "-r", "-p", "--no-color", hash,
+            "diff-tree", "--root", "--no-commit-id", "-r", "-p", "--no-color", hash,
         ], { cwd: repoPath, encoding: "utf8", timeout: 30000, stdio: ["pipe", "pipe", "pipe"] });
     } catch { /* silent */ }
 
