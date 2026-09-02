@@ -176,6 +176,8 @@ export class GitGraphView extends ItemView {
             const detailPanel = body.createDiv({ cls: "git-graph-detail-panel" });
             if (this.isDetailLoading) {
                 const loading = detailPanel.createDiv({ cls: "git-graph-detail-loading" });
+                loading.setAttribute("role", "status");
+                loading.setAttribute("aria-label", "Loading diff");
                 loading.createDiv({ cls: "git-graph-spinner" });
                 loading.createSpan({ text: "Loading diff…" });
             } else if (this.detail) {
@@ -510,7 +512,9 @@ export class GitGraphView extends ItemView {
                 }
             }
         } else if (detail.files.length > 0) {
-            panel.createDiv({ cls: "git-graph-hint", text: "Merge commit — no line diff available." });
+            const hint = panel.createDiv({ cls: "git-graph-hint", text: "Merge commit — no line diff available." });
+            hint.setAttribute("role", "status");
+            hint.setAttribute("aria-label", "Merge commit — no line diff available.");
         }
     }
 
@@ -519,7 +523,9 @@ export class GitGraphView extends ItemView {
         const el = container.createDiv({ cls: "git-graph-empty" });
         const iconEl = el.createDiv({ cls: "git-graph-empty-icon" });
         setIcon(iconEl, "git-branch");
-        el.createEl("p", { text: "No repositories configured." });
+        const message = el.createEl("p", { text: "No repositories configured." });
+        message.setAttribute("role", "status");
+        message.setAttribute("aria-label", "No repositories configured");
         const btn = el.createEl("button", { text: "Open Settings", cls: "mod-cta" });
         btn.addEventListener("click", () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -531,6 +537,8 @@ export class GitGraphView extends ItemView {
 
     private renderLoading(container: HTMLElement) {
         const el = container.createDiv({ cls: "git-graph-loading" });
+        el.setAttribute("role", "status");
+        el.setAttribute("aria-label", "Reading git log");
         el.createDiv({ cls: "git-graph-spinner" });
         el.createSpan({ text: "Reading git log…" });
     }

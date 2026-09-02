@@ -29,5 +29,13 @@ assert.match(graphView, /aria-label.*Filter commits/);
 assert.match(graphView, /aria-label",\s*`Commit \$\{row\.commit\.subject\} by \$\{row\.commit\.author\}, \$\{row\.commit\.relativeDate\}, \$\{row\.commit\.shortHash\}`/s);
 assert.match(graphView, /emptyState\.setAttribute\("role", "status"\)/);
 assert.match(graphView, /commitCount\.setAttribute\("role", "status"\)/);
+assert.match(graphView, /loading\.setAttribute\("role", "status"\)/);
+assert.match(graphView, /loading\.setAttribute\("aria-label", "Loading diff"\)/);
+assert.match(graphView, /hint\.setAttribute\("role", "status"\)/);
+assert.match(graphView, /hint\.setAttribute\("aria-label", "Merge commit — no line diff available\."\)/);
+assert.match(graphView, /el\.setAttribute\("role", "status"\)/);
+assert.match(graphView, /message\.setAttribute\("role", "status"\)/);
+assert.match(graphView, /message\.setAttribute\("aria-label", "No repositories configured"\)/);
+assert.match(graphView, /el\.setAttribute\("aria-label", "Reading git log"\)/);
 
-console.log("docs-contract: 17 checks passed");
+console.log("docs-contract: 24 checks passed");
