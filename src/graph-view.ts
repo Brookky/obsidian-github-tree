@@ -209,7 +209,10 @@ export class GitGraphView extends ItemView {
 
         // Repo selector
         if (this.plugin.settings.repositories.length > 0) {
-            const sel = titleRow.createEl("select", { cls: "git-graph-select" });
+            const sel = titleRow.createEl("select", {
+                cls: "git-graph-select",
+                attr: { "aria-label": "Repository" },
+            });
             for (const repo of this.plugin.settings.repositories) {
                 const label = repo.displayName || repo.path.split("/").pop() || repo.path;
                 const opt = sel.createEl("option", { value: repo.id, text: label });
@@ -281,7 +284,11 @@ export class GitGraphView extends ItemView {
 
         const input = inner.createEl("input", {
             cls: "git-graph-search-input",
-            attr: { type: "text", placeholder: "Filter commits…" },
+            attr: {
+                type: "text",
+                placeholder: "Filter commits…",
+                "aria-label": "Filter commits",
+            },
         });
         input.value = this.searchQuery;
 

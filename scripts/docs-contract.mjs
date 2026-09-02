@@ -24,5 +24,7 @@ assert.match(settings, /\.setName\("Max Commits"\)/);
 assert.match(settings, /\.setName\("Show All Branches by Default"\)/);
 assert.match(graphView, /setAttribute\("role", "button"\)/);
 assert.match(graphView, /e\.key !== "Enter" && e\.key !== " "/);
+assert.match(graphView, /aria-label.*Repository/);
+assert.match(graphView, /aria-label.*Filter commits/);
 
-console.log("docs-contract: 12 checks passed");
+console.log("docs-contract: 14 checks passed");
