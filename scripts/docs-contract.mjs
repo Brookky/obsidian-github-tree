@@ -26,5 +26,6 @@ assert.match(graphView, /setAttribute\("role", "button"\)/);
 assert.match(graphView, /e\.key !== "Enter" && e\.key !== " "/);
 assert.match(graphView, /aria-label.*Repository/);
 assert.match(graphView, /aria-label.*Filter commits/);
+assert.match(graphView, /aria-label",\s*`Commit \$\{row\.commit\.subject\} by \$\{row\.commit\.author\}, \$\{row\.commit\.relativeDate\}, \$\{row\.commit\.shortHash\}`/s);
 
-console.log("docs-contract: 14 checks passed");
+console.log("docs-contract: 15 checks passed");

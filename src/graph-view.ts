@@ -350,6 +350,10 @@ export class GitGraphView extends ItemView {
         rowEl.setAttribute("title", `${row.commit.hash}\n${row.commit.author} · ${row.commit.relativeDate}`);
         rowEl.setAttribute("role", "button");
         rowEl.setAttribute("tabindex", "0");
+        rowEl.setAttribute(
+            "aria-label",
+            `Commit ${row.commit.subject} by ${row.commit.author}, ${row.commit.relativeDate}, ${row.commit.shortHash}`,
+        );
 
         // SVG graph cell
         const svgCell = rowEl.createDiv({ cls: "git-graph-cell-svg" });
