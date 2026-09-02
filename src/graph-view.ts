@@ -246,10 +246,11 @@ export class GitGraphView extends ItemView {
         });
 
         // Max commits display
-        optRow.createSpan({
+        const commitCount = optRow.createSpan({
             cls: "git-graph-meta",
             text: this.rows.length > 0 ? `${this.rows.length} commits` : "",
         });
+        commitCount.setAttribute("role", "status");
 
         // Refresh btn
         const refreshBtn = optRow.createEl("button", {
@@ -333,7 +334,8 @@ export class GitGraphView extends ItemView {
             : this.rows;
 
         if (filtered.length === 0) {
-            content.createDiv({ cls: "git-graph-hint", text: "No matching commits." });
+            const emptyState = content.createDiv({ cls: "git-graph-hint", text: "No matching commits." });
+            emptyState.setAttribute("role", "status");
             return;
         }
 
