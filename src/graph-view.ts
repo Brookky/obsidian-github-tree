@@ -341,6 +341,8 @@ export class GitGraphView extends ItemView {
             : "git-graph-row";
         const rowEl = container.createDiv({ cls });
         rowEl.setAttribute("title", `${row.commit.hash}\n${row.commit.author} · ${row.commit.relativeDate}`);
+        rowEl.setAttribute("role", "button");
+        rowEl.setAttribute("tabindex", "0");
 
         // SVG graph cell
         const svgCell = rowEl.createDiv({ cls: "git-graph-cell-svg" });
@@ -368,8 +370,8 @@ export class GitGraphView extends ItemView {
         meta.createSpan({ cls: "git-graph-sep", text: "·" });
         meta.createSpan({ cls: "git-graph-hash", text: row.commit.shortHash });
 
-        // Click: open detail panel
-        rowEl.addEventListener("click", () => {
+        // Click/keyboard: open detail panel
+        const openDetail = () => {
             const repo = this.getActiveRepo();
             if (!repo) return;
             const scrollTop = container.scrollTop;
@@ -381,6 +383,12 @@ export class GitGraphView extends ItemView {
             const newContent = this.containerEl.querySelector(".git-graph-content") as HTMLElement | null;
             if (newContent) newContent.scrollTop = scrollTop;
             void this.loadDetail(repo.path, row.commit.hash, scrollTop, requestId);
+        };
+        rowEl.addEventListener("click", openDetail);
+        rowEl.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key !== "Enter" && e.key !== " ") return;
+            e.preventDefault();
+            openDetail();
         });
 
         // Context menu

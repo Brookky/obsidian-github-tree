@@ -9,6 +9,7 @@ const readJson = (name) => JSON.parse(read(name));
 const readme = read("README.md");
 const manifest = readJson("manifest.json");
 const source = read("src/main.ts");
+const graphView = read("src/graph-view.ts");
 const settings = read("src/settings.ts");
 
 assert.equal(manifest.name, "Git Graph");
@@ -21,5 +22,7 @@ assert.match(readme, /npm run docs:test/);
 assert.match(source, /name: "Open Git Graph"/);
 assert.match(settings, /\.setName\("Max Commits"\)/);
 assert.match(settings, /\.setName\("Show All Branches by Default"\)/);
+assert.match(graphView, /setAttribute\("role", "button"\)/);
+assert.match(graphView, /e\.key !== "Enter" && e\.key !== " "/);
 
-console.log("docs-contract: 10 checks passed");
+console.log("docs-contract: 12 checks passed");
