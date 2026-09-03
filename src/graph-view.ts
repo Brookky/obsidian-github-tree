@@ -166,7 +166,9 @@ export class GitGraphView extends ItemView {
         } else if (this.rows.length > 0) {
             this.renderGraph(content);
         } else {
-            content.createDiv({ cls: "git-graph-hint", text: "No commits found." });
+            const emptyState = content.createDiv({ cls: "git-graph-hint", text: "No commits found." });
+            emptyState.setAttribute("role", "status");
+            emptyState.setAttribute("aria-label", "No commits found");
         }
 
         if (hasDetail) {
