@@ -340,6 +340,7 @@ export class GitGraphView extends ItemView {
         if (filtered.length === 0) {
             const emptyState = content.createDiv({ cls: "git-graph-hint", text: "No matching commits." });
             emptyState.setAttribute("role", "status");
+            emptyState.setAttribute("aria-label", "No matching commits");
             return;
         }
 

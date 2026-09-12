@@ -28,6 +28,10 @@ assert.match(graphView, /aria-label.*Repository/);
 assert.match(graphView, /aria-label.*Filter commits/);
 assert.match(graphView, /aria-label",\s*`Commit \$\{row\.commit\.subject\} by \$\{row\.commit\.author\}, \$\{row\.commit\.relativeDate\}, \$\{row\.commit\.shortHash\}`/s);
 assert.match(graphView, /emptyState\.setAttribute\("role", "status"\)/);
+assert.match(
+    graphView,
+    /if \(filtered\.length === 0\) \{\s*const emptyState = content\.createDiv\(\{ cls: "git-graph-hint", text: "No matching commits\." \}\);\s*emptyState\.setAttribute\("role", "status"\);\s*emptyState\.setAttribute\("aria-label", "No matching commits"\);\s*return;\s*\}/
+);
 assert.match(graphView, /commitCount\.setAttribute\("role", "status"\)/);
 assert.match(graphView, /loading\.setAttribute\("role", "status"\)/);
 assert.match(graphView, /loading\.setAttribute\("aria-label", "Loading diff"\)/);
@@ -40,4 +44,4 @@ assert.match(graphView, /message\.setAttribute\("role", "status"\)/);
 assert.match(graphView, /message\.setAttribute\("aria-label", "No repositories configured"\)/);
 assert.match(graphView, /el\.setAttribute\("aria-label", "Reading git log"\)/);
 
-console.log("docs-contract: 26 checks passed");
+console.log("docs-contract: 27 checks passed");
