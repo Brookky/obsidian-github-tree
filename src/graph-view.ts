@@ -240,6 +240,7 @@ export class GitGraphView extends ItemView {
         // All branches toggle
         const allBranchWrap = optRow.createEl("label", { cls: "git-graph-toggle-label" });
         const allBranchCheck = allBranchWrap.createEl("input", { type: "checkbox" });
+        allBranchCheck.setAttribute("aria-label", "All branches");
         allBranchCheck.checked = this.plugin.settings.showAllBranches;
         allBranchWrap.createSpan({ text: "All branches" });
         allBranchCheck.addEventListener("change", async () => {

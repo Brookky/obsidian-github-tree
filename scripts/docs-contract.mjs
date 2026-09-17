@@ -26,6 +26,10 @@ assert.match(graphView, /setAttribute\("role", "button"\)/);
 assert.match(graphView, /e\.key !== "Enter" && e\.key !== " "/);
 assert.match(graphView, /aria-label.*Repository/);
 assert.match(graphView, /aria-label.*Filter commits/);
+assert.match(
+    graphView,
+    /const allBranchCheck = allBranchWrap\.createEl\("input", \{ type: "checkbox" \}\);\s*allBranchCheck\.setAttribute\("aria-label", "All branches"\);\s*allBranchCheck\.checked = this\.plugin\.settings\.showAllBranches;\s*allBranchWrap\.createSpan\(\{ text: "All branches" \}\);\s*allBranchCheck\.addEventListener\("change", async \(\) => \{\s*this\.plugin\.settings\.showAllBranches = allBranchCheck\.checked;\s*await this\.plugin\.saveSettings\(\);\s*const repo = this\.getActiveRepo\(\);\s*if \(repo\) await this\.loadGraph\(repo\.path\);\s*\}\);/
+);
 assert.match(graphView, /aria-label",\s*`Commit \$\{row\.commit\.subject\} by \$\{row\.commit\.author\}, \$\{row\.commit\.relativeDate\}, \$\{row\.commit\.shortHash\}`/s);
 assert.match(graphView, /emptyState\.setAttribute\("role", "status"\)/);
 assert.match(
@@ -44,4 +48,4 @@ assert.match(graphView, /message\.setAttribute\("role", "status"\)/);
 assert.match(graphView, /message\.setAttribute\("aria-label", "No repositories configured"\)/);
 assert.match(graphView, /el\.setAttribute\("aria-label", "Reading git log"\)/);
 
-console.log("docs-contract: 27 checks passed");
+console.log("docs-contract: 28 checks passed");
